@@ -88,7 +88,7 @@ def main():
     cy = font.em/2
     trcen = psMat.translate(-cx,-cy)
     rotcen = psMat.compose(trcen, psMat.compose(psMat.rotate(math.radians(90)), psMat.inverse(trcen)))
-    font.transform(rotcen,("round"))
+    font.transform(rotcen)
 
     # Save the output font
     font.generate(args.output)

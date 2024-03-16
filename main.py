@@ -40,6 +40,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("input", help="input font file name")
     parser.add_argument("output", help="output font file name")
+    parser.add_argument("--round", action="store_true", help="round all glyph points in the output font")
     args = parser.parse_args()
     
     # Open intput font
@@ -70,7 +71,7 @@ def main():
             g.width += pos_sub[-2] # horizontal advance
             g.vwidth += pos_sub[-1] # vertical advance
             tr = psMat.translate(pos_sub[-4],pos_sub[-3]) # position
-            g.transform(tr,("round"))
+            g.transform(tr)
             subbed.append(g.unicode)
         else:
             eprint("maybe unhandled: unknown",pos_sub,c,g.glyphname)
@@ -89,6 +90,12 @@ def main():
     trcen = psMat.translate(-cx,-cy)
     rotcen = psMat.compose(trcen, psMat.compose(psMat.rotate(math.radians(90)), psMat.inverse(trcen)))
     font.transform(rotcen)
+    font.selection.none()
+
+    if args.round:
+        font.selection.all()
+        font.round()
+        font.selection.none()
 
     # Save the output font
     font.generate(args.output)

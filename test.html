@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="jp">
+<head>
+<style id='style'></style>
+<script>
+const par = "abcあ「<span class='bord'>ひら</span>が<mark>な、カ</mark>タ<s>カナ</s>、<u>漢字hngk國ｚｎｇｋ</u>。」㌀<br>ニューライン！［０１＼］23⑨？：（）㋿";
+function class_name(font) {
+	ans = font.split("").map(c => c.charCodeAt(0).toString(16).padStart(2, "0")).join("");
+	return "C"+ans;
+}
+function get_par(cl) {
+	return "<div class='"+cl+"'><p>"+par+"</p></div><hr>";
+}
+function get_html(fonts) {
+	var ans = "";
+	for(var i=0; i<fonts.length; i++) {
+		ans+=get_par(class_name(fonts[i]));
+	}
+	return ans;
+}
+function get_single_css(font, ff, ver) {
+	var css = `
+		@font-face {
+			font-family: "${ff}";
+			src: url("${font}");
+		}
+		.${ff} {
+			font-family: "${ff}";
+	`;
+	if(ver) {
+		css += "writing-mode: vertical-rl;\n"
+	}
+	css += "}\n";
+	return css;
+}
+function get_css(fv, fh) {
+	css=`
+		.bord {
+			border: 1px solid black;
+		}
+		.correct {
+		}
+	`;
+	for(var i=0; i<fv.length; i++) {
+		css+=get_single_css(fv[i],class_name(fv[i]),true);
+	}
+	for(var i=0; i<fh.length; i++) {
+		css+=get_single_css(fh[i],class_name(fh[i]),false);
+	}
+	return css;
+}
+function build(fv,fh) {
+	document.getElementById('style').innerHTML = get_css(fv,fh);
+	document.getElementById('main').innerHTML = get_html(fv)+get_html(fh);
+}
+</script>
+</head>
+<body onload="build(['original.ttf'],['out1.ttf','out2.ttf']);">
+<main id='main'></main>
+</body>

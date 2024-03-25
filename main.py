@@ -98,9 +98,9 @@ def main():
     # Select the glyphs that need to be rotated
     ranges = map(lambda x: x[0], filter(lambda x: x[1]=="U" or x[1]=="Tu", table))
     for rang in ranges: # select according to the table
-        font.selection.select(("ranges","more"),*rang)
+        font.selection.select(("ranges","more","unicode"),*rang)
     for guni in subbed: # also select all those that have been substituted
-        font.selection.select(("more",),guni)
+        font.selection.select(("singletons","more","unicode"),guni)
 
     # Rotate selected glyphs
     cx = font.em/2

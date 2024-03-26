@@ -12,3 +12,8 @@ You can use this script to rotate the font by 90 degrees correctly.
 
 The rules for rotating the glyphs can be found [here](https://www.unicode.org/reports/tr50/)
 
+## Usage
+
+You need python and fontforge installed.
+To use the script, in the command line write: `python input output`, where "input" is the input file name and "output" the output file name.
+

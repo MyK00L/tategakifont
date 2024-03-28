@@ -116,6 +116,7 @@ def main():
     # Apply substitution for vertical text present in the font
     subbed=[]
     apply_sub(font,"vert",subbed)
+    # apply_sub(font,"vpal")
     # apply_sub(font,"vrt2",subbed) # what is this even ??
     # apply_sub(font,"vkna",subbed) # does this do something useful?
 
@@ -142,20 +143,6 @@ def main():
                 if tag in tagmap:
                     for st in tagmap[tag]:
                         g.removePosSub(st)
-            if "vpal" in tagmap and "palt" in tagmap:
-                i=0
-                for st in tagmap["vpal"]:
-                    for ps in g.getPosSub(st):
-                        nst = tagmap["palt"][i%len(tagmap["palt"])] # TODO: how should I choose one??
-                        g.addPosSub(nst,ps[3],ps[2],ps[5],ps[4])
-                        i+=1
-            if "vkrn" in tagmap and "kern" in tagmap:
-                i=0
-                for st in tagmap["vkrn"]:
-                    for ps in g.getPosSub(st):
-                        nst = tagmap["kern"][i%len(tagmap["kern"])] # TODO: same as above
-                        g.addPosSub(nst,ps[2],ps[4],ps[3],ps[6],ps[5],ps[8],ps[7],ps[10],ps[9])
-                        i+=1
         else:
             for tag in ["kern","dist"]:
                 if tag in tagmap:

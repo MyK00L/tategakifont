@@ -53,8 +53,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("input", help="input font file name")
     parser.add_argument("output", help="output font file name")
-    parser.add_argument("--no-round", action="store_true", help="do not round all glyph points in the output font")
+    parser.add_argument("--half-to-full", action="store_true", help="replace halfwidth glyphs with fullwidth, this will make all english letters and punctuation upright")
     parser.add_argument("--only-sub-table", action="store_true", help="apply glyph substitutions only if they are marked as T, Tu or Tr in the vertical orientation property table")
+    parser.add_argument("--no-round", action="store_true", help="do not round all glyph points in the output font")
     parser.add_argument("--rotation-center", choices=["halfemdesc","halfem","bb"],default="halfemdesc",help="middle point for rotation:\nbb = bounding box of all glyphs to be rotated,\nhalfem = (em/2,em/2),\nhalfemdesc = (em/2,em/2-descent)")
     args = parser.parse_args()
     
@@ -123,6 +124,16 @@ def main():
     rotcen = psMat.compose(trcen, psMat.compose(psMat.rotate(math.radians(90)), psMat.inverse(trcen)))
     font.transform(rotcen)
     font.selection.none()
+
+    if args.half_to_full:
+        for chw in range(33,127):
+            cfw = chw+0xfee0
+            font.selection.select(("singletons","unicode"),cfw)
+            font.copy()
+            font.selection.none()
+            font.selection.select(("singletons","unicode"),chw)
+            font.paste()
+            font.selection.none()
 
     if not args.no_round:
         font.selection.all()

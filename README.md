@@ -15,5 +15,6 @@ The rules for rotating the glyphs can be found [here](https://www.unicode.org/re
 ## Usage
 
 You need python and fontforge installed.
-To use the script, in the command line write: `python input output`, where "input" is the input file name and "output" the output file name.
+You might also need to install some of the dependencies listed as imports at the top of `main.py` using `pip` or some other package manager.
+To use the script, in the command line write: `python main.py input output`, where "input" is the input file name and "output" the output file name.
 

@@ -35,6 +35,49 @@ def get_table():
 def has_vert_sub(g):
     return any((vs in ' '.join(map(lambda x: x[0], g.getPosSub("*"))) for vs in ["vert", "vrt", "vkna", "Vert"]) )
 
+tagmap = {}
+ttlook = {}
+def fill_tagmap(font):
+    lookups = font.gpos_lookups + font.gsub_lookups
+    for lookup in lookups:
+        tags = map(lambda x: x[0], font.getLookupInfo(lookup)[2])
+        tables = font.getLookupSubtables(lookup)
+        for tag in tags:
+            if tag not in ttlook:
+                ttlook[tag] = []
+            ttlook[tag].append(lookup)
+            if tag not in tagmap:
+                tagmap[tag] = []
+            for table in tables:
+                tagmap[tag].append(table)
+
+def apply_sub(font, tag, subbed=[]):
+    if tag not in tagmap:
+        eprint("No", tag, "in font")
+        return
+    for g in font.glyphs():
+        pss = [item for tup in map(lambda st: g.getPosSub(st), tagmap[tag]) for item in tup]
+        if len(pss)==0:
+            continue
+        ps = pss[0]
+        if ps[1] in ["Substitution","AltSubs"]:
+            font.selection.none()
+            font.selection.select(ps[2])
+            font.copy()
+            font.selection.none()
+            font.selection.select(g)
+            font.paste()
+            font.selection.none()
+            subbed.append(g)
+        elif ps[1]=="Position":
+            g.width += ps[-2] # horizontal advance
+            g.vwidth += ps[-1] # vertical advance
+            tr = psMat.translate(ps[-4],ps[-3]) # position
+            g.transform(tr)
+            subbed.append(g)
+        else:
+            eprint("Unhandled",ps[1],tag,"for glyph",g)
+
 def table_at(table, code):
     lb = -1
     ub = len(table)
@@ -58,7 +101,7 @@ def main():
     parser.add_argument("--no-round", action="store_true", help="do not round all glyph points in the output font")
     parser.add_argument("--rotation-center", choices=["halfemdesc","halfem","bb"],default="halfemdesc",help="middle point for rotation:\nbb = bounding box of all glyphs to be rotated,\nhalfem = (em/2,em/2),\nhalfemdesc = (em/2,em/2-descent)")
     args = parser.parse_args()
-    
+
     table = get_table()
 
     # Open intput font
@@ -67,42 +110,64 @@ def main():
     # Modify name
     font.fontname+="-Rotated"
     font.fullname+=" Rotated"
-    
+
+    fill_tagmap(font)
+
     # Apply substitution for vertical text present in the font
-    subbed = []
-    for g in list(filter(has_vert_sub, font.glyphs())):
-        if g.unicode==-1:
-            continue
-        if args.only_sub_table and (table_at(table,g.unicode) not in ["T","Tr","Tu"]):
-            continue;
-        c=chr(g.unicode)
-        pos_sub = list(filter(lambda s: any(vs in s for vs in ["vert", "vrt", "Vert"]), map(lambda x: x[0], g.getPosSub("*"))) )[0]
-        pos_sub = g.getPosSub(pos_sub)[0]
-        if pos_sub[1]=="Substitution":
-            font.selection.none()
-            font.selection.select(pos_sub[2])
-            font.copy()
-            font.selection.none()
-            font.selection.select(g)
-            font.paste()
-            font.selection.none()
-            subbed.append(g.unicode)
-        elif pos_sub[1]=="Position":
-            g.width += pos_sub[-2] # horizontal advance
-            g.vwidth += pos_sub[-1] # vertical advance
-            tr = psMat.translate(pos_sub[-4],pos_sub[-3]) # position
-            g.transform(tr)
-            subbed.append(g.unicode)
-        else:
-            eprint("maybe unhandled: unknown",pos_sub,c,g.glyphname)
-    
+    subbed=[]
+    apply_sub(font,"vert",subbed)
+    # apply_sub(font,"vrt2",subbed) # what is this even ??
+    # apply_sub(font,"vkna",subbed) # does this do something useful?
+
     # Select the glyphs that need to be rotated
     ranges = map(lambda x: x[0], filter(lambda x: x[1]=="U" or x[1]=="Tu", table))
     for rang in ranges: # select according to the table
         font.selection.select(("ranges","more","unicode"),*rang)
 
-    for guni in subbed: # also select all those that have been substituted
-        font.selection.select(("singletons","more","unicode"),guni)
+    for g in font.selection.byGlyphs:
+        subs = g.getPosSub("*")
+        for sub in subs:
+            if sub[1] in ["Substitution","MultiSubs","AltSubs"]:
+                for j in range(2,len(sub)):
+                    if font[sub[j]].unicode==-1:
+                        font.selection.select(("more",),sub[j])
+
+    for g in subbed: # also select all those that have been substituted
+        font.selection.select(("singletons","more"),g)
+
+    # remove dist, kern, palt from rotated glyphs, move vkern and vpal to kern and palt
+    for g in font.glyphs():
+        if font.selection[g]:
+            for tag in ["palt","kern","dist"]:
+                if tag in tagmap:
+                    for st in tagmap[tag]:
+                        g.removePosSub(st)
+            if "vpal" in tagmap and "palt" in tagmap:
+                i=0
+                for st in tagmap["vpal"]:
+                    for ps in g.getPosSub(st):
+                        nst = tagmap["palt"][i%len(tagmap["palt"])] # TODO: how should I choose one??
+                        g.addPosSub(nst,ps[3],ps[2],ps[5],ps[4])
+                        i+=1
+            if "vkrn" in tagmap and "kern" in tagmap:
+                i=0
+                for st in tagmap["vkrn"]:
+                    for ps in g.getPosSub(st):
+                        nst = tagmap["kern"][i%len(tagmap["kern"])] # TODO: same as above
+                        g.addPosSub(nst,ps[2],ps[4],ps[3],ps[6],ps[5],ps[8],ps[7],ps[10],ps[9])
+                        i+=1
+        else:
+            for tag in ["kern","dist"]:
+                if tag in tagmap:
+                    for st in tagmap[tag]:
+                        delete = False
+                        for row in g.getPosSub(st):
+                            if font.selection[font[row[2]]]:
+                                #TODO: delete only this row
+                                delete = True
+                                break
+                        if delete:
+                            g.removePosSub(st)
 
     # Rotate selected glyphs
     cx = font.em/2

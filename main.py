@@ -105,7 +105,7 @@ def main():
     table = get_table()
 
     # Open intput font
-    font = fontforge.open(args.input)
+    font = fontforge.open(args.input, ("allglyphsinttc","alltables"))
     if font.is_cid:
         font.cidFlatten()
 

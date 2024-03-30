@@ -106,6 +106,8 @@ def main():
 
     # Open intput font
     font = fontforge.open(args.input)
+    if font.is_cid:
+        font.cidFlatten()
 
     # Modify name
     if font.fontname is not None:
@@ -123,9 +125,14 @@ def main():
     # apply_sub(font,"vkna",subbed) # does this do something useful?
 
     # Select the glyphs that need to be rotated
+    '''
     ranges = map(lambda x: x[0], filter(lambda x: x[1]=="U" or x[1]=="Tu", table))
     for rang in ranges: # select according to the table
-        font.selection.select(("ranges","more","unicode"),*rang)
+        font.selection.select(("unicode","more","ranges"),*rang)
+    '''
+    for g in font.glyphs():
+        if table_at(table, g.unicode) in ["U","Tu"]:
+            font.selection.select(("more",),g)
 
     for g in font.selection.byGlyphs:
         subs = g.getPosSub("*")
@@ -136,7 +143,7 @@ def main():
                         font.selection.select(("more",),sub[j])
 
     for g in subbed: # also select all those that have been substituted
-        font.selection.select(("singletons","more"),g)
+        font.selection.select(("more","singletons"),g)
 
     # remove dist, kern, palt from rotated glyphs, move vkern and vpal to kern and palt
     for g in font.glyphs():
@@ -182,10 +189,10 @@ def main():
     if args.half_to_full:
         for chw in range(33,127):
             cfw = chw+0xfee0
-            font.selection.select(("singletons","unicode"),cfw)
+            font.selection.select(("unicode","singletons"),cfw)
             font.copy()
             font.selection.none()
-            font.selection.select(("singletons","unicode"),chw)
+            font.selection.select(("unicode","singletons"),chw)
             font.paste()
             font.selection.none()
 

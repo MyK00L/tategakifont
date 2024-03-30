@@ -108,8 +108,10 @@ def main():
     font = fontforge.open(args.input)
 
     # Modify name
-    font.fontname+="-Rotated"
-    font.fullname+=" Rotated"
+    if font.fontname is not None:
+        font.fontname+="-Rotated"
+    if font.fullname is not None:
+        font.fullname+=" Rotated"
 
     fill_tagmap(font)
 

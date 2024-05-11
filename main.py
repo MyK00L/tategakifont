@@ -1,9 +1,7 @@
-import urllib.request
 import fontforge
 import argparse
 import psMat
 import math
-import re
 import sys
 
 # utility to print to stderr

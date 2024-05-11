@@ -117,27 +117,28 @@ def main():
     # apply_sub(font,"vkna",subbed) # does this do something useful?
 
     # Select the glyphs that need to be rotated
-    '''
-    ranges = map(lambda x: x[0], filter(lambda x: x[1]=="U" or x[1]=="Tu", table))
-    for rang in ranges: # select according to the table
-        font.selection.select(("unicode","more","ranges"),*rang)
-    '''
     for g in font.glyphs():
         if table_at(table, g.unicode) in ["U","Tu"]:
             font.selection.select(("more",),g)
 
-    for g in font.selection.byGlyphs:
-        subs = g.getPosSub("*")
-        for sub in subs:
-            if sub[1] in ["Substitution","MultiSubs","AltSubs"]:
-                for j in range(2,len(sub)):
-                    if font[sub[j]].unicode==-1:
-                        font.selection.select(("more",),sub[j])
+    # Select substitutions based on original glyph
+    for g in font.glyphs():
+        if g.unicode != -1:
+            subs = g.getPosSub("*")
+            for sub in subs:
+                if sub[1] in ["Substitution","MultiSubs","AltSubs"]:
+                    for j in range(2,len(sub)):
+                        if font[sub[j]].unicode==-1:
+                            if table_at(table, g.unicode) in ["U", "Tu"]:
+                                font.selection.select(("more",),sub[j])
+                            else:
+                                font.selection.select(("less",),sub[j])
 
-    for g in subbed: # also select all those that have been substituted
+    # Select all glyphs that have been substituted with vert
+    for g in subbed:
         font.selection.select(("more","singletons"),g)
 
-    # remove dist, kern, palt from rotated glyphs, move vkern and vpal to kern and palt
+    # Remove dist, kern, palt from rotated glyphs, move vkern and vpal to kern and palt
     for g in font.glyphs():
         if font.selection[g]:
             for tag in ["palt","kern","dist"]:

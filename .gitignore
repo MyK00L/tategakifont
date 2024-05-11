@@ -2,4 +2,8 @@
 *.otf
 *.sfd
 *.ttc
+vort/target/
+vort/debug/
+**/*.rs.bk
+**/*.pbd
 

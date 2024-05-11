@@ -18,17 +18,11 @@ def eprint(*args, **kwargs):
 # see https://www.unicode.org/reports/tr50/tr50-8.html
 def get_table():
     def line_to_range_type(x):
-        x = x.replace(";"," ").split()
-        m = re.match(r"(.*)\.\.(.*)",x[0])
-        if m:
-            return [[int(m.group(1),16),int(m.group(2),16)],x[1]]
-        else:
-            return [[int(x[0],16),int(x[0],16)],x[1]]
-    #csv = urllib.request.urlopen("https://www.unicode.org/Public/vertical/revision-17/VerticalOrientation-17.txt").read().decode("utf-8")
-    with open("VerticalOrientation.txt") as csv_file: # get table stored locally
-        csv=csv_file.read()
-    csv = re.sub(r"(?m)^#.*\n?", "", csv)
-    table = list(map(line_to_range_type,filter(lambda x: not re.match(r"^\s*$",x) , csv.splitlines())))
+        x = x.split()
+        return [[int(x[0],16),int(x[1],16)],x[2]]
+    with open("table.txt") as file: # get table stored locally
+        contents=file.read()
+    table = list(map(line_to_range_type,contents.splitlines()))
     return table
 
 # Returns true if the font has a sub for vertical text associated in the font

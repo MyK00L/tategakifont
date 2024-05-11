@@ -19,7 +19,7 @@ def eprint(*args, **kwargs):
 def get_table():
     def line_to_range_type(x):
         x = x.replace(";"," ").split()
-        m = re.match("(.*)\.\.(.*)",x[0])
+        m = re.match(r"(.*)\.\.(.*)",x[0])
         if m:
             return [[int(m.group(1),16),int(m.group(2),16)],x[1]]
         else:
@@ -28,7 +28,7 @@ def get_table():
     with open("VerticalOrientation.txt") as csv_file: # get table stored locally
         csv=csv_file.read()
     csv = re.sub(r"(?m)^#.*\n?", "", csv)
-    table = list(map(line_to_range_type,filter(lambda x: not re.match("^\s*$",x) , csv.splitlines())))
+    table = list(map(line_to_range_type,filter(lambda x: not re.match(r"^\s*$",x) , csv.splitlines())))
     return table
 
 # Returns true if the font has a sub for vertical text associated in the font
@@ -158,7 +158,7 @@ def main():
                     for st in tagmap[tag]:
                         delete = False
                         for row in g.getPosSub(st):
-                            if font.selection[font[row[2]]]:
+                            if row[2] != -1 and font.selection[font[row[2]]]:
                                 #TODO: delete only this row
                                 delete = True
                                 break

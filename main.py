@@ -43,13 +43,13 @@ def fill_tagmap(font):
             for table in tables:
                 tagmap[tag].append(table)
 
-def apply_sub(font, tag, subbed=[]):
+def apply_sub(font, tag, should_sub, subbed=[]):
     if tag not in tagmap:
         eprint("No", tag, "in font")
         return
     for g in font.glyphs():
         pss = [item for tup in map(lambda st: g.getPosSub(st), tagmap[tag]) for item in tup]
-        if len(pss)==0:
+        if len(pss)==0 or not should_sub(g):
             continue
         ps = pss[0]
         if ps[1] in ["Substitution","AltSubs"]:
@@ -111,7 +111,7 @@ def main():
 
     # Apply substitution for vertical text present in the font
     subbed=[]
-    apply_sub(font,"vert",subbed)
+    apply_sub(font, "vert", lambda g: not (args.only_sub_table and table_at(table, g.unicode) not in ["T", "Tu", "Tr"]), subbed)
     # apply_sub(font,"vpal")
     # apply_sub(font,"vrt2",subbed) # what is this even ??
     # apply_sub(font,"vkna",subbed) # does this do something useful?
@@ -176,7 +176,7 @@ def main():
         cy = font.em/2
     trcen = psMat.translate(-cx,-cy)
     rotcen = psMat.compose(trcen, psMat.compose(psMat.rotate(math.radians(90)), psMat.inverse(trcen)))
-    font.transform(rotcen)
+    font.transform(rotcen, ("guide", "simplePos", "kernClasses"))
     font.selection.none()
 
     if args.half_to_full:

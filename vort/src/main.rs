@@ -17,7 +17,7 @@ impl std::fmt::Display for Orient {
 }
 
 const LATEST_URL: &str = "https://www.unicode.org/Public/UCD/latest/ucd/VerticalOrientation.txt";
-const SUPPORTED_URL: &str = "https://www.unicode.org/Public/15.1.0/ucd/VerticalOrientation.txt";
+const SUPPORTED_URL: &str = "https://www.unicode.org/Public/16.0.0/ucd/VerticalOrientation.txt";
 fn get_csv() -> String {
     let csv_supported = ureq::get(SUPPORTED_URL)
         .call()

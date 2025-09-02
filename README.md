@@ -4,17 +4,19 @@
 
 このスクリプトはフォントを正確に９０度で回してくれる。
 
-If you need vertical text in a syntem that does not support it, you can rotate by 90 degrees the font and the screen instead.
+If you need vertical text in a system that does not support it, you can rotate the font and the screen by 90 degrees instead.
 
 You can use this script to rotate the font by 90 degrees correctly.
 
-## rules for rotation
+## Rules for rotation
 
-The rules for rotating the glyphs can be found [here](https://www.unicode.org/reports/tr50/)
+The rules for rotating the glyphs can be found [on the Unicode website](https://www.unicode.org/reports/tr50/).
 
 ## Usage
 
-You need python and fontforge installed.
-You might also need to install some of the dependencies listed as imports at the top of `main.py` using `pip` or some other package manager.
-To use the script, in the command line write: `python main.py input output`, where "input" is the input file name and "output" the output file name.
+You need Python and FontForge installed. It has been tested to work with Python 3.8.10 and FontForge 20230101.
+
+You shouldn't need to install any further dependencies, unless you are compiling FontForge from source.
+
+To use the script, at the command line write: `python main.py input output`, where "input" is the input file name and "output" the output file name.
 

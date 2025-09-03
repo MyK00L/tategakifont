@@ -4,7 +4,7 @@ import psMat
 import math
 import sys
 
-# utility to print to stderr
+# Utility to print to stderr
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
@@ -96,7 +96,7 @@ def main():
 
     table = get_table()
 
-    # Open intput font
+    # Open input font
     font = fontforge.open(args.input, ("allglyphsinttc","alltables"))
     if font.is_cid:
         font.cidFlatten()

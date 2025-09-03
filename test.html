@@ -1,15 +1,18 @@
 <!DOCTYPE html>
+<!-- "zh-Hant", "jp", ... -->
 <html lang="jp">
 <head>
 <style id='style'></style>
 <script>
-const par = "bp!あぉ〱「<span class='bord'>ひら</span>が<mark>な、カ</mark>タ<s>カナ</s>、<u><ruby>漢<rt>かん</rt>字<rt>じ</rt></ruby>hngk國ｚｎｇｋ</u>。」㌀<br>ニューライン！［０１＼］23⑨？：（）㋿";
+// TODO: make different ones for different languages
+const default_par = "bp!あぉ〱「<span class='bord'>ひら</span>が<mark>な、カ</mark>タ<s>カナ</s>、<u><ruby>漢<rt>かん</rt>字<rt>じ</rt></ruby>hngk國ｚｎｇｋ</u>。」㌀<br>ニューライン！［０１＼］23⑨？：（）㋿";
+const default_lang = "jp";
 function class_name(font) {
 	ans = font.split("").map(c => c.charCodeAt(0).toString(16).padStart(2, "0")).join("");
 	return "C"+ans;
 }
 function get_par(cl) {
-	return "<div class='"+cl+"'><p>"+par+"</p></div><hr>";
+	return "<div class='"+cl+"'><p class='testpar'>"+document.getElementById('par_input').value+"</p></div><hr>";
 }
 function get_html(fonts) {
 	var ans = "";
@@ -52,9 +55,36 @@ function get_css(fv, fh) {
 function build(fv,fh) {
 	document.getElementById('style').innerHTML = get_css(fv,fh);
 	document.getElementById('main').innerHTML = get_html(fv)+get_html(fh);
+	document.getElementById('par_input').value = default_par;
+}
+function rebuild() {
+	fv = document.getElementById('fv_input').value;
+	fh = document.getElementById('fh_input').value;
+	build([fv],[fh])
+}
+function init() {
+	fv = document.getElementById('fv_input').value = "original.ttf";
+	fh = document.getElementById('fh_input').value = "rotated.ttf";
+	update_par(default_par);
+	update_lang(default_lang);
+	rebuild()
+}
+function update_par(txt) {
+	for(p of document.getElementsByClassName('testpar')) {
+		p.innerHTML = txt;
+	}
+}
+function update_lang(lang) {
+	document.documentElement.setAttribute("lang", lang);
 }
 </script>
 </head>
-<body onload="build(['original.ttf'],['out1.ttf','out2.ttf']);">
+<!-- Insert here the font path to original and corresponding rotated fonts -->
+<body onload="init();">
 <main id='main'></main>
+<br>
+<input style="width:100%" type='text' placeholder='test paragraph' id='par_input' onchange='update_par(this.value)'>
+<p> original font path: <input type='text' placeholder='original font path' id='fv_input' onchange='rebuild()'></p>
+<p> rotated font path: <input type='text' placeholder='rotated font path' id='fh_input' onchange='rebuild()'></p>
+<p> lang: <input type='text' placeholder='language' id='lang_input' onchange='update_lang(this.value)'></p>
 </body>

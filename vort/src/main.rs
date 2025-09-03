@@ -22,9 +22,15 @@ fn get_csv() -> String {
     let csv_supported = ureq::get(SUPPORTED_URL)
         .call()
         .unwrap()
-        .into_string()
+        .into_body()
+        .read_to_string()
         .unwrap();
-    let csv_latest = ureq::get(LATEST_URL).call().unwrap().into_string().unwrap();
+    let csv_latest = ureq::get(LATEST_URL)
+        .call()
+        .unwrap()
+        .into_body()
+        .read_to_string()
+        .unwrap();
     if csv_supported != csv_latest {
         eprintln!("WARNING: Supported VerticalOrientation is out of date")
     }
@@ -34,36 +40,33 @@ fn get_csv_ranges() -> Vec<((u32, u32), Orient)> {
     let csv = get_csv();
     csv.lines()
         .filter_map(|cline| {
-            cline
-                .split('#')
-                .next()
-                .and_then(|x| {
-                    let line = x.trim();
-                    if !line.is_empty() {
-                        let row: Vec<&str> = line.split(';').collect();
-                        let or = match row[1].trim() {
-                            "U" => Orient::U,
-                            "R" => Orient::R,
-                            "Tu" => Orient::Tu,
-                            "Tr" => Orient::Tr,
-                            _ => panic!(),
-                        };
-                        let rv: Vec<&str> = row[0].split("..").collect();
-                        let rang = if rv.len() == 1 {
-                            let rb = u32::from_str_radix(rv[0].trim(), 16).unwrap();
-                            (rb, rb)
-                        } else if rv.len() == 2 {
-                            let rb = u32::from_str_radix(rv[0].trim(), 16).unwrap();
-                            let re = u32::from_str_radix(rv[1].trim(), 16).unwrap();
-                            (rb, re)
-                        } else {
-                            panic!();
-                        };
-                        Some((rang, or))
+            cline.split('#').next().and_then(|x| {
+                let line = x.trim();
+                if !line.is_empty() {
+                    let row: Vec<&str> = line.split(';').collect();
+                    let or = match row[1].trim() {
+                        "U" => Orient::U,
+                        "R" => Orient::R,
+                        "Tu" => Orient::Tu,
+                        "Tr" => Orient::Tr,
+                        _ => panic!(),
+                    };
+                    let rv: Vec<&str> = row[0].split("..").collect();
+                    let rang = if rv.len() == 1 {
+                        let rb = u32::from_str_radix(rv[0].trim(), 16).unwrap();
+                        (rb, rb)
+                    } else if rv.len() == 2 {
+                        let rb = u32::from_str_radix(rv[0].trim(), 16).unwrap();
+                        let re = u32::from_str_radix(rv[1].trim(), 16).unwrap();
+                        (rb, re)
                     } else {
-                        None
-                    }
-                })
+                        panic!();
+                    };
+                    Some((rang, or))
+                } else {
+                    None
+                }
+            })
         })
         .collect()
 }

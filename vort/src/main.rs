@@ -17,7 +17,7 @@ impl std::fmt::Display for Orient {
 }
 
 const LATEST_URL: &str = "https://www.unicode.org/Public/UCD/latest/ucd/VerticalOrientation.txt";
-const SUPPORTED_URL: &str = "https://www.unicode.org/Public/16.0.0/ucd/VerticalOrientation.txt";
+const SUPPORTED_URL: &str = "https://www.unicode.org/Public/17.0.0/ucd/VerticalOrientation.txt";
 fn get_csv() -> String {
     let csv_supported = ureq::get(SUPPORTED_URL)
         .call()
@@ -95,9 +95,11 @@ fn get_default_ranges() -> Vec<((u32, u32), Orient)> {
         ((0x14400, 0x1467f), Orient::U),
         ((0x16fe0, 0x18aff), Orient::U),
         ((0x18b00, 0x18d7f), Orient::U),
+        ((0x18d80, 0x18dff), Orient::U),
         ((0x1aff0, 0x1afff), Orient::U),
         ((0x1b100, 0x1b16f), Orient::U),
         ((0x1b170, 0x1b2ff), Orient::U),
+        ((0x1cec0, 0x1ceff), Orient::U),
         ((0x1cf00, 0x1cfcf), Orient::U),
         ((0x1d000, 0x1d1ff), Orient::U),
         ((0x1d2e0, 0x1d2ff), Orient::U),

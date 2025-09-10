@@ -1,8 +1,8 @@
-import fontforge
-import argparse
-import psMat
-import math
 import sys
+import argparse
+import math
+import fontforge
+import psMat
 
 # Utility to print to stderr
 def eprint(*args, **kwargs):
@@ -43,7 +43,7 @@ def fill_tagmap(font):
             for table in tables:
                 tagmap[tag].append(table)
 
-def apply_sub(font, tag, should_sub, subbed=[]):
+def apply_sub(font, tag, should_sub, subbed):
     if tag not in tagmap:
         eprint("No", tag, "in font")
         return
@@ -70,6 +70,7 @@ def apply_sub(font, tag, should_sub, subbed=[]):
         else:
             eprint("Unhandled",ps[1],tag,"for glyph",g)
 
+# Get the value in the vert table for a unicode point
 def table_at(table, code):
     lb = -1
     ub = len(table)

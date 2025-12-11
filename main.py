@@ -107,6 +107,9 @@ def main():
         font.fontname+="-Rotated"
     if font.fullname is not None:
         font.fullname+=" Rotated"
+    if font.sfnt_names is not None:
+        for ms_name in font.sfnt_names:
+            ms_name=(ms_name[0],ms_name[1],ms_name[2]+" Rotated")
 
     fill_tagmap(font)
 
